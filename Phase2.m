@@ -26,13 +26,13 @@ samplingPeriod = carrierSignal / dataRate;
 [lowB, lowA] = butter(6,0.2);
 amp = 1;
 t = 0: 1/carrierSignal : nBits/dataRate;
-SNR_dB = -20:1:20;
+SNR_dB = 0:5:50;
 SNR = (10.^(SNR_dB/10));
 modifySNR_dB = 5;
 errorRateOOK = zeros(length(SNR));
 carrier = amp .* cos(2*pi*carrierFrequency*t);
 signalLength = carrierSignal*nBits/dataRate + 1;
-numRuns = 5;
+numRuns = 10;
 
 for i = 1 : length(SNR)
     avgErrorOOK = 0;
@@ -72,8 +72,8 @@ for i = 1 : length(SNR)
             if(finalResultOOK(k) ~= data(k))
                 errorOOK = errorOOK + 1;
             end
-            avgErrorOOK = errorOOK + avgErrorOOK;
         end 
+        avgErrorOOK = errorOOK + avgErrorOOK;
     end
     
     % Variable Plots
@@ -117,5 +117,3 @@ function binary_out = decision_device(sampled,num_bit,threshold)
         end
     end
 end
-        
-
