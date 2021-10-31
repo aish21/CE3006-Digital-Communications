@@ -90,9 +90,9 @@ hold off
 %plot waveforms at different stages 
 figure(2);
 subplot(511);plot(plotSignal);title('Data Generated: ');
-subplot(512);plot(plotBPSK,'k');title('Step - Modulation (OOK): ');
+subplot(512);plot(plotBPSK,'k');title('Step - Modulation (BPSK): ');
 subplot(513);plot(plotBPSKTransmit, 'k');title('Signal Recieved: ');
-subplot(514);plot(plotLPfilterBPSK, 'k');title('Step - Demodulation (OOK): ');
+subplot(514);plot(plotLPfilterBPSK, 'k');title('Step - Demodulation (BPSK): ');
 subplot(515);plot(plotfinalResultBPSK);title('Decoded: ');
 
 % Sampling and Decision Device Simulation
