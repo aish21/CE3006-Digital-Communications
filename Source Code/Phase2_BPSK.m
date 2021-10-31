@@ -37,7 +37,7 @@ for i = 1 : length(SNR)
         end
         dataStream(signalLength) = dataStream(signalLength - 1);
     
-        bpskSourceSignal = 2.* dataStream - 1; 
+        bpskSourceSignal = 2.* dataStream - 1;                      %Make the signal 1 and -1
         bpskSignal = carrier .* bpskSourceSignal; 
            
         %calculate expected noise for transmission  
