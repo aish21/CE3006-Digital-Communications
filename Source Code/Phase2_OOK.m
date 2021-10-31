@@ -32,7 +32,7 @@ modifySNR_dB = 5;
 errorRateOOK = zeros(length(SNR));
 carrier = amp .* cos(2*pi*carrierFrequency*t);
 signalLength = carrierSignal*nBits/dataRate + 1;
-numRuns = 10;
+numRuns = 20;
 
 for i = 1 : length(SNR)
     avgErrorOOK = 0;

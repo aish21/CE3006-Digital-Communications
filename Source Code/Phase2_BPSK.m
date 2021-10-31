@@ -1,6 +1,23 @@
 close all;
 clc;
 
+% Modulation Technique 2: Binary Phase Shift Keying 
+
+%{ 
+    - Num of bits = 1024 (given)
+    - Let the carrier frequency be 10KHz
+    - Assume one cycle contains 16 samples
+    - Baseband data rate = 1Kbps
+    - Assume a 6th order filter with cut-off frequency 0.2 (low pass)
+    - Define Amplitude, time
+    - Initialize SNR, set value to change plots
+    - Initialize error variable
+    - Calculate signal length
+    - Set number of runs
+    - Functions to simulate decision device + sampling
+    - Plotting
+%}
+
 nBits = 1024;
 carrierFrequency = 10000;
 samplingFreq = carrierFrequency * 16;
@@ -9,13 +26,13 @@ samplingPeriod = samplingFreq / dataRate;
 [lowB, lowA] = butter(6,0.2);
 amp = 1;
 t = 0: 1/samplingFreq : nBits/dataRate;
-SNR_dB = 0:5:50;
+SNR_dB = -50:5:50;
 SNR = (10.^(SNR_dB/10));
 modifySNR_dB = 5;
 errorRateBPSK = zeros(1,length(SNR));
 carrier = amp .* cos(2*pi*carrierFrequency*t);
 signalLength = samplingFreq*nBits/dataRate + 1;
-numRuns = 5;
+numRuns = 20;
 
 for i = 1 : length(SNR)
     data = round(rand(1,nBits));
@@ -26,8 +43,8 @@ for i = 1 : length(SNR)
     end
     dataStream(signalLength) = dataStream(signalLength - 1);
 
-    bpskSourceSignal = 2.* dataStream - 1; %*2 bc of negative 1 and 1 bc ook is 0 to 1 so don't need *2
-    bpskSignal = carrier .* bpskSourceSignal; % this too
+    bpskSourceSignal = 2.* dataStream - 1; 
+    bpskSignal = carrier .* bpskSourceSignal; 
        
     bpskSignalPower = (norm(bpskSignal)^2)/signalLength;
     bpskNoisePower = bpskSignalPower ./ SNR(i);
@@ -50,8 +67,6 @@ for i = 1 : length(SNR)
         end
     end 
     errorRateBPSK(i) = errorBPSK/nBits;
-
-
 end
 
 figure(1);
