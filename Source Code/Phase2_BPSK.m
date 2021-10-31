@@ -3,37 +3,28 @@ clc;
 
 % Modulation Technique 1: Binary Phase Shift Keying 
 
-%{ 
-    - Num of bits = 1024 (given)
-    - Let the carrier frequency be 10KHz
-    - Assume one cycle contains 16 samples
-    - Baseband data rate = 1Kbps
-    - Assume a 6th order filter with cut-off frequency 0.2 (low pass)
-    - Define Amplitude, time
-    - Initialize SNR, set value to change plots
-    - Initialize error variable
-    - Calculate signal length
-    - Set number of runs
-    - Functions to simulate decision device + sampling
-    - Plotting
-%}
+nBits = 1024;                               %Num of bits = 1024 (given)
+carrierFrequency = 10000;                   %Let the carrier frequency be 10KHz
+samplingFreq = carrierFrequency * 16;       %signal is 16 times oversampled 
+dataRate = 1000;                            %considering the baseband data rate as 1 kbps.
+samplingPeriod = samplingFreq / dataRate;   
+[lowB, lowA] = butter(6,0.2);               %6th order filter with cut-off frequency 0.2 (low pass)
 
-nBits = 1024; %Num of bits = 1024 (given)
-carrierFrequency = 10000; %Let the carrier frequency be 10KHz
-samplingFreq = carrierFrequency * 16; % signal is oversampled 16 time
-dataRate = 1000;
-samplingPeriod = samplingFreq / dataRate;
-[lowB, lowA] = butter(6,0.2);
-amp = 1;
+%Define Amplitude, time
+amp = 1;                                    
 t = 0: 1/samplingFreq : nBits/dataRate;
-SNR_dB = -50:5:50;
-SNR = (10.^(SNR_dB/10));
-errorRateBPSK = zeros(1,length(SNR));
-carrier = amp .* cos(2*pi*carrierFrequency*t);
-signalLength = samplingFreq*nBits/dataRate + 1;
-numRuns = 10;
 
-modifySNR_dB = 5;
+SNR_dB = -50:5:50;                         %Initialize SNR range and steps
+SNR = (10.^(SNR_dB/10));                   %Converting SNR DB
+errorRateBPSK = zeros(1,length(SNR));      %Intialize error variable
+signalLength = samplingFreq*nBits/dataRate + 1; %calculate singal length after sampling
+
+carrier = amp .* cos(2*pi*carrierFrequency*t); %define carrier signal
+
+numRuns = 10;                                  %define number times to run 
+
+%Change to inspect waveforms for different SNRs
+SelectedSNR_DB = 5;
 
 for i = 1 : length(SNR)
     avgError = 0;
@@ -46,25 +37,30 @@ for i = 1 : length(SNR)
         end
         dataStream(signalLength) = dataStream(signalLength - 1);
     
-        bpskSourceSignal = 2.* dataStream - 1; %*2 bc of negative 1 and 1 bc ook is 0 to 1 so don't need *2
-        bpskSignal = carrier .* bpskSourceSignal; % this too
+        bpskSourceSignal = 2.* dataStream - 1; 
+        bpskSignal = carrier .* bpskSourceSignal; 
            
+        %calculate expected noise for transmission  
         bpskSignalPower = (norm(bpskSignal)^2)/signalLength;
         bpskNoisePower = bpskSignalPower ./ SNR(i);
         bpskNoise = sqrt(bpskNoisePower/2) .* randn(1,signalLength);
-    
+        
+        %adding noise to the generated signal
         bpskTransmit = bpskSignal + bpskNoise;
-    
+        
+        % Use coherent detection - to demodulate transmitted signal
         bpskDemodulated = bpskTransmit .* (2 .* carrier);
+        
+        % Pass this through the LP filter
         bpskFiltered = filtfilt(lowB, lowA,  bpskDemodulated);
-    
+        
+        %Sample the signal
         bpskSample = sample(bpskFiltered, samplingPeriod, nBits);
         finalResultBPSK = decision_device(bpskSample,nBits, 0);
     
+        %Calculate Error 
         errorBPSK = 0;
-       
         for k = 1: nBits - 1
-            %fprintf("%d -> %d\n", data(k), finalResultBPSK(k));
             if(finalResultBPSK(k) ~= data(k))
                 errorBPSK = errorBPSK + 1;
             end
@@ -72,7 +68,7 @@ for i = 1 : length(SNR)
         avgError = avgError + errorBPSK/nBits;
         
         % Variable Plots
-        if (modifySNR_dB == SNR_dB(i))
+        if (SelectedSNR_DB == SNR_dB(i))
             plotSignal = data;
             plotBPSK = bpskSignal;
             plotBPSKTransmit = bpskTransmit;
@@ -83,6 +79,7 @@ for i = 1 : length(SNR)
     errorRateBPSK(i) = avgError/numRuns;
 end
 
+%Plotting the BER vs SNR graph
 figure(1);
 plot1 = semilogy (SNR_dB,errorRateBPSK,'k-*');
 ylabel('Bit Error Rate (BER)');
@@ -90,13 +87,15 @@ xlabel('SNR (dB)');
 title("BPSK")
 hold off
 
+%plot waveforms at different stages 
 figure(2);
-subplot(511);title('Data Generated: ');plot(plotSignal);
-subplot(512);title('Step - Modulation (OOK): ');plot(plotBPSK,'k');
-subplot(513);title('Signal Recieved: ');plot(plotBPSKTransmit, 'k')
-subplot(514);title('Step - Demodulation (OOK): ');plot(plotLPfilterBPSK, 'k');
-subplot(515);title('Decoded: ');plot(plotfinalResultBPSK);
+subplot(511);plot(plotSignal);title('Data Generated: ');
+subplot(512);plot(plotBPSK,'k');title('Step - Modulation (OOK): ');
+subplot(513);plot(plotBPSKTransmit, 'k');title('Signal Recieved: ');
+subplot(514);plot(plotLPfilterBPSK, 'k');title('Step - Demodulation (OOK): ');
+subplot(515);plot(plotfinalResultBPSK);title('Decoded: ');
 
+% Sampling and Decision Device Simulation
 function sampled = sample(x,sampling_period,num_bit)
     sampled = zeros(1, num_bit);
     for n = 1: num_bit
