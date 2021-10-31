@@ -14,9 +14,11 @@ dataRate = 1000;
 Signal = randi([0 1],1,nBits);
 % Max timestamp
 totalTime = nBits/dataRate;
-% Calculate the time instances
+% Calculate sampling period
 samplingPeriod = 1/samplingFrequency;
+% Calculate number of data points
 nSteps = totalTime/samplingPeriod;
+% Defining the time points
 t = 0:samplingPeriod:totalTime;
 
 % Define the 2 carrier functions
@@ -29,8 +31,10 @@ carrier0 = cos(pi*carrierFrequency*t);
 % Find the transmitted signal
 transmittedSignal = zeros([1 nSteps]);
 count = 0;
+% Calculating the number of samples per bit of signal
 timePerBit = 1/dataRate;
 noOfSamplesPerBit = timePerBit / samplingPeriod;
+% Creating the sampled signal
 for bit = Signal
     for i = 1:noOfSamplesPerBit
         count = count+1;
@@ -43,11 +47,14 @@ transmittedSignal(count + 1) = transmittedSignal(count);
 FSKmodulated1 = carrier1 .* (transmittedSignal == 1);
 FSKmodulated2 = carrier0 .* (transmittedSignal == -1);
 modulatedSig = FSKmodulated1 + FSKmodulated2;
+% Calculating the signal power
 sigPower = rms(modulatedSig)^2;
 
 index = 0;
+% Defining the SNR range
 SNRvalues = -50:5:50;
 meanBitError = zeros([1 length(SNRvalues)]);
+% Iterating through the different SNR values
 for SNR = SNRvalues
     index = index+1;
     bitErrorRate = zeros([1 nBits]);
@@ -90,6 +97,8 @@ for SNR = SNRvalues
         % Calculating error
         bitErrorRate(sample) = mean(result ~= Signal);
     end
+
+    % Assigning to the mean error rate
     meanBitError(index) = mean(bitErrorRate);
 
     % Variable Plots
@@ -100,17 +109,22 @@ for SNR = SNRvalues
         plotfinalResultFSK = result;
     end
 end
-% 
 
+% Plotting the mean BER vs SNR
 figure(1)
-%semilogy (SNRvalues, theoreticalError,'r', 'linewidth', 1.5);
 hold on
 semilogy(SNRvalues, meanBitError,'k-*');
+xlabel('SNR (dB)');
+ylabel('Bit Error Rate (BER)');
+title('FSK');
+
 hold off
 
+% Plotting the different stages of FSK modulation and demodulation
 figure(2);
-subplot(5,1,1);title('Data Generated: ');plot(Signal);
-subplot(5,1,2);title('Step - Modulation (FSK): ');plot(plotFSK,'k');
-subplot(5,1,3);title('Signal Recieved: ');plot(plotFSKTransmit, 'k')
-subplot(5,1,4);title('Step - Demodulation (FSK): ');plot(plotLPfilterFSK, 'k');
-subplot(5,1,5);title('Decoded: ');plot(plotfinalResultFSK);
+titles = {'Data Generated: ', 'Step - Modulation (FSK): ', 'Signal Recieved: ','Step - Demodulation (FSK): ','Decoded: '}; 
+subplot(5,1,1);plot(Signal);title('Data Generated: ');
+subplot(5,1,2);plot(plotFSK,'k');title('Step - Modulation (FSK): ');
+subplot(5,1,3);plot(plotFSKTransmit, 'k');title('Signal Recieved: ');
+subplot(5,1,4);plot(plotLPfilterFSK, 'k');title('Step - Demodulation (FSK): ');
+subplot(5,1,5);plot(plotfinalResultFSK);title('Decoded: ');
