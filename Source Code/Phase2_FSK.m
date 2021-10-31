@@ -6,16 +6,18 @@ nBits = 1024;
 % Given carrier frequency
 carrierFrequency = 10000; 
 % Sampled at 16 times the frequency
-samplingFrequency = 16 * carrierFrequency;
+samplingFrequency = 32 * carrierFrequency;
 % Given data rate
 dataRate = 1000;
 
 % Generate the random signal
-Signal = randomSignalGenerator(nBits);
+Signal = randi([0 1],1,nBits);
 % Max timestamp
 totalTime = nBits/dataRate;
 % Calculate the time instances
-t = 0:1/samplingFrequency:totalTime;
+samplingPeriod = 1/samplingFrequency;
+nSteps = totalTime/samplingPeriod;
+t = 0:samplingPeriod:totalTime;
 
 % Define the 2 carrier functions
 carrier1 = cos(2*pi*carrierFrequency*t);
@@ -24,18 +26,18 @@ carrier0 = cos(pi*carrierFrequency*t);
 % Thresholds for the 6th order butterworth filter
 [b,a] = butter(6,0.2);
 
-% Calculate signal length
-sigLength = totalTime * samplingFrequency;
 % Find the transmitted signal
-transmittedSignal = zeros([1 sigLength]);
+transmittedSignal = zeros([1 nSteps]);
 count = 0;
+timePerBit = 1/dataRate;
+noOfSamplesPerBit = timePerBit / samplingPeriod;
 for bit = Signal
-    for i = 1:160
+    for i = 1:noOfSamplesPerBit
         count = count+1;
         transmittedSignal(count) = bit;
     end
 end
-transmittedSignal(count+1) = transmittedSignal(count);
+transmittedSignal(count + 1) = transmittedSignal(count);
 
 % Find the modulated signal
 FSKmodulated1 = carrier1 .* (transmittedSignal == 1);
@@ -44,9 +46,8 @@ modulatedSig = FSKmodulated1 + FSKmodulated2;
 sigPower = rms(modulatedSig)^2;
 
 index = 0;
-SNRvalues = 0:5:50;
+SNRvalues = -50:5:50;
 meanBitError = zeros([1 length(SNRvalues)]);
-theoreticalError = zeros([1 length(SNRvalues)]);
 for SNR = SNRvalues
     index = index+1;
     bitErrorRate = zeros([1 nBits]);
@@ -63,26 +64,26 @@ for SNR = SNRvalues
         transmittedFSK = modulatedSig+Noise;
 
         %Coherent demodulation of FSK
-        BFSK_demod1 = transmittedFSK .* 2.* carrier1;
+        BFSK_demod1 = transmittedFSK*2.* carrier1;
         BFSK1_filter = filtfilt(b,a,BFSK_demod1);
-        BFSK_demod0 = transmittedFSK .*2 .* carrier0;
+        BFSK_demod0 = transmittedFSK*2 .* carrier0;
         BFSK0_filter = filtfilt(b,a,BFSK_demod0);
         BFSK_demod = BFSK_demod1 -BFSK_demod0 ;
 
         count = 0;
         result = zeros([1 nBits]);
         % sampling
-        for i = 80:160:length(BFSK_demod)
+        for i = 20:noOfSamplesPerBit:length(BFSK_demod)
             count = count+1;
             result(count) = BFSK_demod(i);
         end
 
         % Applying threshold logic
         for i = 1:length(result)
-            if result(i) >= 0
+            if result(i) >= 0.5
                 result(i) = 1;
             else
-                result(i) = -1;
+                result(i) = 0;
             end
         end
 
@@ -90,7 +91,6 @@ for SNR = SNRvalues
         bitErrorRate(sample) = mean(result ~= Signal);
     end
     meanBitError(index) = mean(bitErrorRate);
-    theoreticalError(index) = qfunc(sqrt(10^(SNR/10)));
 
     % Variable Plots
     if (SNR == 5)
@@ -103,14 +103,10 @@ end
 % 
 
 figure(1)
-semilogy (SNRvalues, theoreticalError,'r', 'linewidth', 1.5);
+%semilogy (SNRvalues, theoreticalError,'r', 'linewidth', 1.5);
 hold on
-plot1 = semilogy(SNRvalues, meanBitError,'r*');
-ylabel('Bit Error Rate (BER)');
-xlabel('SNR (dB)');
-legend(plot1(1),{'Experimental'})
-xlim([0 50]);
-title("Empirical and Theoretical BER for Coherrent Detection Techniques")
+semilogy(SNRvalues, meanBitError,'k-*');
+hold off
 
 figure(2);
 subplot(5,1,1);title('Data Generated: ');plot(Signal);
@@ -118,13 +114,3 @@ subplot(5,1,2);title('Step - Modulation (FSK): ');plot(plotFSK,'k');
 subplot(5,1,3);title('Signal Recieved: ');plot(plotFSKTransmit, 'k')
 subplot(5,1,4);title('Step - Demodulation (FSK): ');plot(plotLPfilterFSK, 'k');
 subplot(5,1,5);title('Decoded: ');plot(plotfinalResultFSK);
-
-function valuesSig = randomSignalGenerator(totalBits) 
-    valuesSig = round(rand(1,totalBits));
-    % convert 1 to +1 and 0 to -1
-    for i = 1:totalBits
-        if(valuesSig(i)==0)
-            valuesSig(i) = -1;
-        end     
-    end
-end
