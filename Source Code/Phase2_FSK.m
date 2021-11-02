@@ -1,12 +1,13 @@
-clear all; 
+close all; 
 clear workspace;
+clc;
 
 % Given number of bits
 nBits = 1024;
 % Given carrier frequency
 carrierFrequency = 10000; 
 % Sampled at 16 times the frequency
-samplingFrequency = 32 * carrierFrequency;
+samplingFrequency = 16 * carrierFrequency;
 % Given data rate
 dataRate = 1000;
 
@@ -75,7 +76,7 @@ for SNR = SNRvalues
         BFSK1_filter = filtfilt(b,a,BFSK_demod1);
         BFSK_demod0 = transmittedFSK*2 .* carrier0;
         BFSK0_filter = filtfilt(b,a,BFSK_demod0);
-        BFSK_demod = BFSK_demod1 -BFSK_demod0 ;
+        BFSK_demod = BFSK1_filter -BFSK0_filter ;
 
         count = 0;
         result = zeros([1 nBits]);
