@@ -1,4 +1,5 @@
 close all;
+clear workspace;
 clc;
 
 % Modulation Technique 1: Binary Phase Shift Keying 
@@ -84,7 +85,7 @@ figure(1);
 plot1 = semilogy (SNR_dB,errorRateBPSK,'k-*');
 ylabel('Bit Error Rate (BER)');
 xlabel('SNR (dB)');
-title("BPSK")
+title("Bit error probability for BPSK modulation")
 hold off
 
 %plot waveforms at different stages 
