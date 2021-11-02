@@ -1,4 +1,5 @@
 close all;
+clear workspace;
 clc;
 
 % Modulation Technique 1: On-Off Keying 
@@ -90,14 +91,17 @@ end
 % Plotting Error + OOK
 figure(1);
 semilogy (SNR_dB,errorRateOOK,'k-*');
+ylabel('Bit Error Rate (BER)');
+xlabel('SNR (dB)');
+title("Bit error probability for OOK modulation");
 hold off
 
 figure(2);
-subplot(511);title('Data Generated: ');plot(plotSignal);
-subplot(512);title('Step - Modulation (OOK): ');plot(plotOOK,'k');
-subplot(513);title('Signal Recieved: ');plot(plotOOKTransmit, 'k')
-subplot(514);title('Step - Demodulation (OOK): ');plot(plotLPfilterOOK, 'k');
-subplot(515);title('Decoded: ');plot(plotfinalResultOOK);
+subplot(511);plot(plotSignal);title('Data Generated: ');
+subplot(512);plot(plotOOK,'k');title('Step - Modulation (OOK): ');
+subplot(513);plot(plotOOKTransmit, 'k');title('Signal Recieved: ');
+subplot(514);plot(plotLPfilterOOK, 'k');title('Step - Demodulation (OOK): ');
+subplot(515);plot(plotfinalResultOOK);title('Decoded: ');
 
 % Sampling and Decision Device Simulation
 function sampled = sample(x,sampling_period,num_bit)
