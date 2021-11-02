@@ -1,4 +1,5 @@
 close all; 
+clear workspace;
 clc;
 
 %---------------Define Declaration---------------%
@@ -63,3 +64,6 @@ for i = 1:length(SNR)
 end
 
 plot(SNR,Result)
+ylabel('Bit Error Rate (BER)');
+xlabel('SNR (dB)');
+title("BER vs SNR");
