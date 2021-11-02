@@ -9,6 +9,7 @@ codeword_len = 7;                           %length of codeword
 msgword_len = 4;                            %length of message word
 encBits = nBits*codeword_len/msgword_len;   %no. of bits in encoded signal
 
+%initialisations for CBC encoding
 genpoly = cyclpoly(codeword_len,msgword_len); %n=7, k=4
 parmat = cyclgen(codeword_len,genpoly);
 trt = syndtable(parmat);
@@ -163,14 +164,14 @@ for i = 1 : length(SNR)
             plotfinalResultBPSK = finalResultBPSK;
             
             %HAMMING
-            plotSignalHam = data;
+            plotSignalHam = hammingSignal;
             plotBPSKHam = bpskSignalHam;
             plotBPSKTransmitHam = bpskTransmitHam;
             plotLPfilterBPSKHam = bpskFilteredHam;
             plotfinalResultBPSKHam = finalResultBPSKDecodedHam;
 
             %CBC
-            plotSignalCBC = data;
+            plotSignalCBC = cbcSignal;
             plotBPSKCBC = bpskSignalCBC;
             plotBPSKTransmitCBC = bpskTransmitCBC;
             plotLPfilterBPSKCBC = bpskFilteredCBC;
@@ -184,16 +185,16 @@ end
 
 %Plotting the BER vs SNR graph
 figure(1);
-semilogy (SNR_dB,errorRateBPSK,'k-*');
+semilogy (SNR_dB,errorRateBPSK,'r');
 ylabel('Bit Error Rate (BER)');
 xlabel('SNR (dB)');
-title("BPSK")
+title("BPSK - Encoding Comparison")
 hold on
 
-semilogy (SNR_dB,errorRateBPSKHam,'k-H');
+semilogy (SNR_dB,errorRateBPSKHam,'b');
 hold on
 
-semilogy (SNR_dB,errorRateBPSKCBC,'k-.');
+semilogy (SNR_dB,errorRateBPSKCBC,'g');
 leg = legend('BPSK','BPSK-Hamming','BPSK-CBC');
 set(leg,'location','southwest')
 hold off
@@ -208,19 +209,21 @@ subplot(515);plot(plotfinalResultBPSK);title('Decoded: ');
 
 %plot waveforms at different stages HAMMING
 figure(3);
-subplot(5,1,1);plot(plotSignalHam);title('Data Generated: ');
-subplot(5,1,2);plot(plotBPSKHam,'k');title('Step - Modulation (BPSK): ');
-subplot(5,1,3);plot(plotBPSKTransmitHam, 'k');title('Signal Recieved: ');
-subplot(5,1,4);plot(plotLPfilterBPSKHam, 'k');title('Step - Demodulation (BPSK): ');
-subplot(5,1,5);plot(plotfinalResultBPSKHam);title('Decoded: ');
+subplot(611);plot(plotSignal);title('Data Generated: ');
+subplot(612);plot(plotSignalHam);title('Encoded Data - Hamming: ');
+subplot(613);plot(plotBPSKHam,'k');title('Step - Modulation (BPSK): ');
+subplot(614);plot(plotBPSKTransmitHam, 'k');title('Signal Recieved: ');
+subplot(615);plot(plotLPfilterBPSKHam, 'k');title('Step - Demodulation (BPSK): ');
+subplot(616);plot(plotfinalResultBPSKHam);title('Decoded: ');
 
 %plot waveforms at different stages CBC
 figure(4);
-subplot(5,1,1);plot(plotSignalCBC);title('Data Generated: ');
-subplot(5,1,2);plot(plotBPSKCBC,'k');title('Step - Modulation (BPSK): ');
-subplot(5,1,3);plot(plotBPSKTransmitCBC, 'k');title('Signal Recieved: ');
-subplot(5,1,4);plot(plotLPfilterBPSKCBC, 'k');title('Step - Demodulation (BPSK): ');
-subplot(5,1,5);plot(plotfinalResultBPSKCBC);title('Decoded: ');
+subplot(611);plot(plotSignal);title('Data Generated: ');
+subplot(612);plot(plotSignalCBC);title('Encoded Data - CBC: ');
+subplot(613);plot(plotBPSKCBC,'k');title('Step - Modulation (BPSK): ');
+subplot(614);plot(plotBPSKTransmitCBC, 'k');title('Signal Recieved: ');
+subplot(615);plot(plotLPfilterBPSKCBC, 'k');title('Step - Demodulation (BPSK): ');
+subplot(616);plot(plotfinalResultBPSKCBC);title('Decoded: ');
 
 % Sampling and Decision Device Simulation
 function sampled = sample(x,sampling_period,num_bit)
