@@ -113,7 +113,6 @@ end
 
 % Plotting the mean BER vs SNR
 figure(1)
-hold on
 semilogy(SNRvalues, meanBitError,'k-*');
 xlabel('SNR (dB)');
 ylabel('Bit Error Rate (BER)');
