@@ -116,7 +116,7 @@ figure(1)
 semilogy(SNRvalues, meanBitError,'k-*');
 xlabel('SNR (dB)');
 ylabel('Bit Error Rate (BER)');
-title('FSK');
+title('Bit Error Probability for FSK Modulation');
 
 hold off
 
