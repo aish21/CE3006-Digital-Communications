@@ -1,7 +1,7 @@
 # CE3006-Digital-Communications
 
 ### This is the Github Repository for _CE3006 - Digital Communications_ Course Project. 
-#### The files have been arranged according to the phases mentioned in the report under the folder _Source Code_ - 
+#### The files have been arranged according to the phases mentioned in the report under the folder _Source Code_ 
 > Phase 1
 >   - _Phase1.m_
 
