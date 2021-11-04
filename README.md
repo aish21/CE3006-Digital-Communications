@@ -15,7 +15,7 @@
 
 #### The output generated after running the aforementioned files have been saved under the folder _Generated Output_.
 #### Link to Github Repository: https://github.com/aish21/CE3006-Digital-Communications
-### *Contributors:*
+### **Contributors:**
 - Agnesh Ramesh
 - Kesarimangalam Srinivasan Abhinaya
 - Singh Aishwarya
