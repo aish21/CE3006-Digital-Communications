@@ -11,7 +11,8 @@
 >   - _Phase2_FSK.m_
 
 > **Phase 3**
->   - All Phase 2 files split into _Cyclic and Hamming_ encoding files
+>   - All Phase 3 files contain _Cyclic and Hamming_ encoding 
+>   - Comparison is performed with the methods without encoding
 
 #### The output generated after running the aforementioned files have been saved under the folder _Generated Output_.
 #### Link to Github Repository: https://github.com/aish21/CE3006-Digital-Communications
